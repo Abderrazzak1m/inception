@@ -1,0 +1,60 @@
+version: '2.0'
+services:
+  mariadb:
+    image: mariadb:42
+    container_name:  mariadb
+    build: ./requirements/mariadb/
+    env_file:
+      - .env
+    ports:
+      - 3306
+    volumes: 
+      - mariadb:/var/lib/mysql
+    networks:
+      - networkss
+  nginx:
+    image: nginx:42
+    container_name: nginx
+    build: ./requirements/nginx/
+    env_file:
+      - .env
+    depends_on:
+      - wordpress
+    ports:
+      - 443:443
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - networkss
+  wordpress:
+    image: wordpress:42
+    container_name: wordpress
+    build: ./requirements/wordpress/
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/html
+    ports:
+      - 9000
+    networks:
+      - networkss
+volumes:
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/amiski/data/db
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device:  /home/amiski/data/wordpress
+
+
+networks:
+  networkss:
+    driver: bridge
